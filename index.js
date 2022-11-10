@@ -1,0 +1,2 @@
+const { shambaDivaMiddleware } = require(".");
+shambaDivaMiddleware('')
