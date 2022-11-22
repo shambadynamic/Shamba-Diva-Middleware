@@ -68,7 +68,7 @@ IPFS url of this file: https://bafybeiecrkc4rl4yadcbt47lwuv75xw3fmhmb4wolluap77f
 
 ### Requesting the data from the Shamba Geospatial Oracle 
 
-It sends the request to the Shamba Geospatial Oracle by fetching the request parameters from the Reference Asset (i.e., the url of the Geo-JSON file stored on IPFS) and then passing them as parameters to the [OracleFacing Smart Contract](https://goerli.etherscan.io/address/0xd4Ab99248EA3Dd7dC4805733E182052ABDC95152) via `requestGeostatsData` function inherited from ShambaGeoConsumer contract available in [Shamba Smart Contract Kit](https://github.com/shambadynamic/shamba-smartcontractkit).
+It sends the request to the Shamba Geospatial Oracle by fetching the request parameters from the Reference Asset (i.e., the url of the Geo-JSON file stored on IPFS) and then passing them as parameters to the [OracleFacingGeoConsumer Smart Contract](https://goerli.etherscan.io/address/0xd4Ab99248EA3Dd7dC4805733E182052ABDC95152) via `requestGeostatsData` function inherited from ShambaGeoConsumer contract available in [Shamba Smart Contract Kit](https://github.com/shambadynamic/shamba-smartcontractkit).
 
 ### Receiving the data from the Shamba Geospatial Oracle 
 
