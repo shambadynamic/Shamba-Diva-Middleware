@@ -18,6 +18,7 @@ Below is the content of a sample Geo-JSON file:
 
 ```
 {
+    "agg_x": "agg_mean",
     "dataset": "MODIS/006/MOD13Q1",
     "band": "NDVI",
     "scale": "250",
