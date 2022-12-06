@@ -10,9 +10,9 @@ const apiKey = process.env.ETHERSCAN_API_KEY
 const oracleFacingContractAddress = "0xd4Ab99248EA3Dd7dC4805733E182052ABDC95152"
 const linkContractAddress = "0x326C977E6efc84E512bB9C30f76E30c160eD06FB"
 const dataProviderAddress = "0x8c244f0b2164e6a3bed74ab429b0ebd661bb14ca"
-const divaDiamondAddress = "0x2d941518E0876Fb6042bfCdB403427DC5620b2EC"
+const divaDiamondAddress = "0x659f8bF63Dce2548eB4D9b4BfF6883dddFde4848"
 const divaDiamondABI = require("./diamondABI.json");
-const divaGraphUrl = "https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli-new"
+const divaGraphUrl = "https://thegraph.com/hosted-service/subgraph/divaprotocol/diva-goerli-new-2"
 
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 
@@ -99,6 +99,7 @@ function getEligiblePoolData() {
         pools(orderBy: createdAt, where:{dataProvider: ${dataProviderAddress}, expiryTime_lt: ${timestampNow}, expiryTime_gte: ${timeStampBefore7Days}, statusFinalReferenceValue: "Open"}) {
         id
         referenceAsset
+        expiryTime
         }
     }`
 
@@ -234,25 +235,26 @@ async function setFinalReferenceValue(poolId, geostatsData) {
 
 }
 
-function isValidRequest(requestData) {
+function isValidRequest(requestData, poolExpiryTime) {
 
     agg_x = requestData.agg_x
     dataset = requestData.dataset
     band = requestData.band
     scale = requestData.scale
-    start_date = requestData.start_date
-    end_date = requestData.end_date
+    start_date_string = requestData.start_date
+    end_date_string = requestData.end_date
     geometry = requestData.geometry
 
+    pool_expiry_date_string = (new Date(parseInt(poolExpiryTime) * 1000)).toISOString().split('T')[0];
 
     if (agg_x == "agg_mean" || agg_x == "agg_max" || agg_x == "agg_min" || agg_x == "agg_median" || agg_x == "agg_stdDev" || agg_x == "agg_variance") {
-        if (dataset == "MODIS/006/MOD13Q1" && band == "NDVI" && scale == "250") {
+        if (dataset == "MODIS/MOD09GA_006_NDVI" && band == "NDVI" && scale == "463.313") {
             today = new Date()
             tenDaysAgo = new Date(new Date().setDate(today.getDate() - 10))
-            start_date = new Date(start_date)
-            end_date = new Date(end_date)
+            start_date = new Date(start_date_string)
+            end_date = new Date(end_date_string)
 
-            if (end_date < tenDaysAgo && start_date < end_date) {
+            if (start_date < tenDaysAgo && start_date < end_date && end_date_string == pool_expiry_date_string) {
                 if (geometry != undefined && geometry.hasOwnProperty("features") && geometry.features.length > 0) {
 
                     var i = 0
@@ -291,7 +293,7 @@ exports.shambaDivaMiddleware = async (event, context) => {
 
         if (requestData.data != undefined) {
 
-            if (isValidRequest(requestData.data)) {
+            if (isValidRequest(requestData.data, poolData.expiryTime)) {
 
                 agg_x = requestData.data.agg_x
                 dataset = requestData.data.dataset
