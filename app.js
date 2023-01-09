@@ -235,7 +235,7 @@ async function setFinalReferenceValue(poolId, geostatsData) {
 
 }
 
-function isValidRequest(requestData, poolExpiryTime) {
+function isValidRequest(requestData, poolExpiryTime, poolCreationTime) {
 
     agg_x = requestData.agg_x
     dataset = requestData.dataset
@@ -246,15 +246,20 @@ function isValidRequest(requestData, poolExpiryTime) {
     geometry = requestData.geometry
 
     pool_expiry_date_string = (new Date(parseInt(poolExpiryTime) * 1000)).toISOString().split('T')[0];
+    pool_creation_date_string = (new Date(parseInt(poolCreationTime) * 1000)).toISOString().split('T')[0];
 
     if (agg_x == "agg_mean" || agg_x == "agg_max" || agg_x == "agg_min" || agg_x == "agg_median" || agg_x == "agg_stdDev" || agg_x == "agg_variance") {
-        if (dataset == "MODIS/MOD09GA_006_NDVI" && band == "NDVI" && scale == "463.313") {
+        if (dataset == "VIIRS_VI" && band == "NDVI" && scale == "1000") {
             today = new Date()
-            tenDaysAgo = new Date(new Date().setDate(today.getDate() - 10))
+            // tenDaysAgo = new Date(new Date().setDate(today.getDate() - 10))
             start_date = new Date(start_date_string)
             end_date = new Date(end_date_string)
+            pool_creation_date = new Date(pool_creation_date_string)
 
-            if (start_date < tenDaysAgo && start_date < end_date && end_date_string == pool_expiry_date_string) {
+            diffTime = Math.abs(end_date - start_date);
+            diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+            if (diffDays >= 30 && end_date_string == pool_expiry_date_string && start_date > pool_creation_date) {
                 if (geometry != undefined && geometry.hasOwnProperty("features") && geometry.features.length > 0) {
 
                     var i = 0
@@ -293,7 +298,7 @@ exports.shambaDivaMiddleware = async (event, context) => {
 
         if (requestData.data != undefined) {
 
-            if (isValidRequest(requestData.data, poolData.expiryTime)) {
+            if (isValidRequest(requestData.data, poolData.expiryTime, poolData.createdAt)) {
 
                 agg_x = requestData.data.agg_x
                 dataset = requestData.data.dataset

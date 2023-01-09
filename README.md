@@ -19,9 +19,9 @@ Below is the content of a sample Geo-JSON file:
 ```
 {
     "agg_x": "agg_mean",
-    "dataset": "MODIS/MOD09GA_006_NDVI",
+    "dataset": "VIIRS_VI",
     "band": "NDVI",
-    "scale": "463.313",
+    "scale": "1000",
     "start_date": "2022-06-01",
     "end_date": "2022-08-31",
     "geometry": {
@@ -65,7 +65,7 @@ Below is the content of a sample Geo-JSON file:
 }
 ```
 
-IPFS url of this file: https://bafybeigu2mqm455e6ovyzefzdfy3fxu3dyglqoyzgmbsyctly5iio7amka.ipfs.w3s.link/shamba-reference-asset-new.json
+IPFS url of this file: https://bafybeib2ylks3nm5ldbn3mrnjwwxhwe6upbz5rilaoxgkvn5wzkmngzmza.ipfs.w3s.link/shamba-reference-asset.json
 
 ### Requesting the data from the Shamba Geospatial Oracle 
 
@@ -77,7 +77,7 @@ After the request being made, the corresponding response is received in the form
 
 ### Setting the final reference value of the pool
 
-After receiving the response from the Shamba Geospatial Oracle, the final reference value of the corresponding pool is set by calling the `setFinalReferenceValue` function of the [Diva Settlement Facet](https://goerli.etherscan.io/address/0x92c30A4bA4677F5388Aa270087FAb25660648A1D) through the [Diva Diamond Contract](https://goerli.etherscan.io/address/0x659f8bF63Dce2548eB4D9b4BfF6883dddFde4848) by passing the parameters as `_poolId`, `_finalReferenceValue` having `geostats_data` (18 decimal integer representation) and `_allowChallenge` boolean as `true`.
+After receiving the response from the Shamba Geospatial Oracle, the final reference value of the corresponding pool is set by calling the `setFinalReferenceValue` function of the [Diva Settlement Facet](https://goerli.etherscan.io/address/0xB17D6c790121D31055dC4C17CA5a8d87413D417e) through the [Diva Diamond Contract](https://goerli.etherscan.io/address/0x659f8bF63Dce2548eB4D9b4BfF6883dddFde4848) by passing the parameters as `_poolId`, `_finalReferenceValue` having `geostats_data` (18 decimal integer representation) and `_allowChallenge` boolean as `true`.
 
 
 
