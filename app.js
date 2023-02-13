@@ -199,7 +199,9 @@ async function getGeostatsData() {
 
         return GeoConsumerContract.getGeostatsData()
             .then(geostats_data => {
-                return geostats_data.toString()   // Converting to String representation of BigNumber _hex (already in the 18-decimal integer representation)
+
+                const buffer = ethers.utils.parseUnits("1", "ether")
+                return ethers.BigNumber.from(geostats_data).add(buffer).toString()   // Converting to String representation of BigNumber _hex (already in the 18-decimal integer representation)
             })
             .catch(err => {
                 console.log(err.toString())
@@ -254,12 +256,16 @@ function isValidRequest(requestData, poolExpiryTime, poolCreationTime) {
             // tenDaysAgo = new Date(new Date().setDate(today.getDate() - 10))
             start_date = new Date(start_date_string)
             end_date = new Date(end_date_string)
+            pool_expiry_date = new Date(pool_expiry_date_string)
             pool_creation_date = new Date(pool_creation_date_string)
 
-            diffTime = Math.abs(end_date - start_date);
-            diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            diffTime = Math.abs(end_date - start_date)
+            diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
-            if (diffDays >= 30 && end_date_string == pool_expiry_date_string && start_date > pool_creation_date) {
+            diffTime_Pool = Math.abs(pool_expiry_date - end_date)
+            diffDays_Pool = Math.ceil(diffTime_Pool / (1000 * 60 * 60 * 24))
+
+            if (diffDays >= 30 && diffDays_Pool >= 10 && start_date > pool_creation_date) {
                 if (geometry != undefined && geometry.hasOwnProperty("features") && geometry.features.length > 0) {
 
                     var i = 0
@@ -332,7 +338,7 @@ exports.shambaDivaMiddleware = async (event, context) => {
 
                                             console.log(geostats_data)
 
-                                            finalResult = await setFinalReferenceValue(parseInt(poolData.id), ethers.BigNumber.from(geostats_data))
+                                            finalResult = await setFinalReferenceValue(parseInt(poolData.id), geostats_data)
 
                                             console.log(finalResult)
 
@@ -356,7 +362,7 @@ exports.shambaDivaMiddleware = async (event, context) => {
 
                                 console.log(geostats_data)
 
-                                finalResult = await setFinalReferenceValue(parseInt(poolData.id), ethers.BigNumber.from(geostats_data))
+                                finalResult = await setFinalReferenceValue(parseInt(poolData.id), geostats_data)
 
                                 console.log(finalResult)
 
