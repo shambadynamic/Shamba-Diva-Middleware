@@ -205,12 +205,12 @@ async function getGeostatsData(offset) {
             })
             .catch(err => {
                 console.log(err.toString())
-                return "0"
+                return "-1"
             })
 
     }
     else {
-        return "0"
+        return "-1"
     }
 }
 
@@ -226,7 +226,7 @@ async function setFinalReferenceValue(poolId, geostatsData) {
         .then(tx => {
 
             if (tx.hash != undefined) {
-                return `Transaction is successful with transaction hash as ${tx.hash}. See details on https://goerli.etherscan.io/tx/${tx.hash}.`
+                return `Transaction is successful with transaction hash as ${tx.hash}. See details on https://polygonscan.com/tx/${tx.hash}.`
             }
 
         })
