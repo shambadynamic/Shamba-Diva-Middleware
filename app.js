@@ -98,7 +98,7 @@ function getEligiblePoolData() {
     console.log(timestampNow, timeStampBefore7Days)
 
     const query = `{
-        pools(orderBy: createdAt, where:{dataProvider: "${dataProviderAddress}", expiryTime_lt: ${timestampNow}, expiryTime_gte: ${timeStampBefore7Days}, statusFinalReferenceValue: "Open"}) {
+        pools(orderBy: createdAt, where:{dataProvider: "${dataProviderAddress}", expiryTime_lt: ${timestampNow}, expiryTime_gte: ${timeStampBefore7Days}, statusFinalReferenceValue: "Open", referenceAsset_starts_with: "https://", referenceAsset_contains: "ipfs", referenceAsset_ends_with: ".json"}) {
         id
         referenceAsset
         expiryTime
@@ -117,7 +117,7 @@ function getEligiblePoolData() {
                 lastId = response.data.data.pools[response.data.data.pools.length - 1].id
 
                 const queryMore = `{
-                    pools(where:{id_gt: ${lastId}, dataProvider: "${dataProviderAddress}", expiryTime_lt: ${timestampNow}, expiryTime_gte: ${timeStampBefore7Days}, statusFinalReferenceValue: "Open"}) {
+                    pools(where:{id_gt: ${lastId}, dataProvider: "${dataProviderAddress}", expiryTime_lt: ${timestampNow}, expiryTime_gte: ${timeStampBefore7Days}, statusFinalReferenceValue: "Open", referenceAsset_starts_with: "https://", referenceAsset_contains: "ipfs", referenceAsset_ends_with: ".json"}) {
                     id
                     referenceAsset
                     expiryTime
@@ -192,7 +192,7 @@ function getRequestDataFromIPFS(ipfsUrl) {
         });
 }
 
-async function sendRequest(agg_x, dataset_code, selected_band, image_scale, start_date, end_date, geometry) {
+async function sendRequest(agg_x, dataset_code, selected_band, image_scale, start_date, end_date, geometry, pool_id) {
 
     const contractABI = await getContractABI(oracleFacingContractAddress, apiKey)
 
@@ -208,15 +208,16 @@ async function sendRequest(agg_x, dataset_code, selected_band, image_scale, star
 
         gasLimit = GeoConsumerContract.estimateGas.requestGeostatsData(agg_x, dataset_code, selected_band, image_scale, start_date, end_date, geometry)
 
-        return GeoConsumerContract.requestGeostatsData(agg_x, dataset_code, selected_band, image_scale, start_date, end_date, geometry, {gasLimit: gasLimit, gasPrice: gasPrice})
+        return GeoConsumerContract.requestGeostatsData(agg_x, dataset_code, selected_band, image_scale, start_date, end_date, geometry, { gasLimit: gasLimit, gasPrice: gasPrice })
             .then(_ => {
 
                 // console.log(data)
-                return ({ "Success": "Request has been sent to Shamba Geospatial Oracle successfully." })
+                return ({ "Success": `Request for pool id ${pool_id} has been sent to Shamba Geospatial Oracle successfully.` })
             })
             .catch(err => {
                 console.log(err.toString())
-                return ({ "Error": "Error occured while sending request to Shamba Geospatial Oracle. Make sure that the contract is being funded with at least 1 LINK per request." })
+                return ({ "Error": `Error for pool id ${pool_id} occured while sending request to Shamba Geospatial Oracle.` })
+                //Make sure that the contract is being funded with at least 1 LINK per request.` })
             });;
 
 
@@ -273,11 +274,11 @@ async function setFinalReferenceValue(poolId, geostatsData) {
 
     gasLimit = DivaDiamondContract.estimateGas.setFinalReferenceValue(poolId, geostatsData, true)
 
-    return DivaDiamondContract.setFinalReferenceValue(poolId, geostatsData, true, {gasLimit: gasLimit, gasPrice: gasPrice})
+    return DivaDiamondContract.setFinalReferenceValue(poolId, geostatsData, true, { gasLimit: gasLimit, gasPrice: gasPrice })
         .then(tx => {
 
             if (tx.hash != undefined) {
-                return `Transaction is successful with transaction hash as ${tx.hash}. See details on https://polygonscan.com/tx/${tx.hash}.`
+                return `Transaction for pool id ${poolId} is successful with transaction hash as ${tx.hash}. See details on https://polygonscan.com/tx/${tx.hash}.`
             }
 
         })
@@ -351,120 +352,135 @@ function isValidRequest(requestData, poolExpiryTime, poolCreationTime) {
 
 }
 
-exports.shambaDivaMiddleware = async (event, context) => {
+exports.shambaDivaMiddleware = (event, context) => {
 
-    poolDataList = await getEligiblePoolData()
+    getEligiblePoolData().then((poolDataList) => {
+        // console.log(poolDataList)
+        for (var poolData of poolDataList) {
+            console.log(poolData)
+            getRequestDataFromIPFS(poolData.referenceAsset).then((requestData) => {
+                if (requestData.data != undefined) {
 
-    console.log(poolDataList)
+                    if (isValidRequest(requestData.data, poolData.expiryTime, poolData.createdAt)) {
 
-    for (var poolData of poolDataList) {
-        requestData = await getRequestDataFromIPFS(poolData.referenceAsset)
+                        agg_x = requestData.data.agg_x
+                        dataset = requestData.data.dataset
+                        band = requestData.data.band
+                        scale = requestData.data.scale
+                        start_date = requestData.data.start_date
+                        end_date = requestData.data.end_date
+                        geometry = requestData.data.geometry
+                        offset = requestData.data.offset
 
-        if (requestData.data != undefined) {
+                        geometry_array = []
 
-            if (isValidRequest(requestData.data, poolData.expiryTime, poolData.createdAt)) {
-
-                agg_x = requestData.data.agg_x
-                dataset = requestData.data.dataset
-                band = requestData.data.band
-                scale = requestData.data.scale
-                start_date = requestData.data.start_date
-                end_date = requestData.data.end_date
-                geometry = requestData.data.geometry
-                offset = requestData.data.offset
-
-                geometry_array = []
-
-                for (geometry_map of geometry.features) {
-                    geometry_array.push([geometry_map.properties.id, JSON.stringify(geometry_map.geometry.coordinates)])
-                }
-
-                // getLinkBalanceOfContract(oracleFacingContractAddress).then(async balance => {
-
-                //     if (balance < 1) {
-                //         console.log('balance < 1')
-                //         fundContract(oracleFacingContractAddress, 1).then(async result => {
-                //             if (result != undefined && result.Success != undefined) {
-                //                 request = await sendRequest(agg_x, dataset, band, scale, start_date, end_date, geometry_array)
-
-                //                 console.log(request)
-
-                //                 if (request != undefined && request.Success != undefined) {
-                //                     sleep(60000).then(async _ => {
-                //                         geostats_data = await getGeostatsData(offset)
-
-                //                         if (parseInt(geostats_data) != 0) {
-
-                //                             console.log(geostats_data)
-
-                //                             finalResult = await setFinalReferenceValue(parseInt(poolData.id), geostats_data)
-
-                //                             console.log(finalResult)
-
-                //                         }
-
-                //                     })
-                //                 }
-                //             }
-                //         })
-                //     }
-                //     else {
-
-                //         console.log('balance >= 1')
-                //         request = await sendRequest(agg_x, dataset, band, scale, start_date, end_date, geometry_array)
-
-                //         console.log(request)
-
-                //         if (request != undefined && request.Success != undefined) {
-                //             sleep(60000).then(async _ => {
-                //                 geostats_data = await getGeostatsData(offset)
-
-                //                 console.log(geostats_data)
-
-                //                 finalResult = await setFinalReferenceValue(parseInt(poolData.id), geostats_data)
-
-                //                 console.log(finalResult)
-
-                //             })
-                //         }
-                //     }
-                // })
-
-                request = await sendRequest(agg_x, dataset, band, scale, start_date, end_date, geometry_array)
-
-                console.log(request)
-
-                if (request != undefined && request.Success != undefined) {
-                    sleep(60000).then(async _ => {
-                        geostats_data = await getGeostatsData(offset)
-
-                        console.log(geostats_data)
-
-                        tries = 1
-
-                        while (geostatsData == "-1" && tries < 3) {
-
-                            console.log("Try: ", tries)
-
-                            request = await sendRequest(agg_x, dataset, band, scale, start_date, end_date, geometry_array)
-                            // console.log(request)
-
-                            if (request != undefined && request.Success != undefined) {
-                                sleep(60000).then(async _ => {
-                                    geostats_data = await getGeostatsData(offset)
-                                    tries += 1
-                                })
-                            }
+                        for (geometry_map of geometry.features) {
+                            geometry_array.push([geometry_map.properties.id, JSON.stringify(geometry_map.geometry.coordinates)])
                         }
 
-                        finalResult = await setFinalReferenceValue(parseInt(poolData.id), geostats_data)
+                        // getLinkBalanceOfContract(oracleFacingContractAddress).then(async balance => {
 
-                        console.log(finalResult)
+                        //     if (balance < 1) {
+                        //         console.log('balance < 1')
+                        //         fundContract(oracleFacingContractAddress, 1).then(async result => {
+                        //             if (result != undefined && result.Success != undefined) {
+                        //                 request = await sendRequest(agg_x, dataset, band, scale, start_date, end_date, geometry_array)
 
-                    })
+                        //                 console.log(request)
+
+                        //                 if (request != undefined && request.Success != undefined) {
+                        //                     sleep(60000).then(async _ => {
+                        //                         geostats_data = await getGeostatsData(offset)
+
+                        //                         if (parseInt(geostats_data) != 0) {
+
+                        //                             console.log(geostats_data)
+
+                        //                             finalResult = await setFinalReferenceValue(parseInt(poolData.id), geostats_data)
+
+                        //                             console.log(finalResult)
+
+                        //                         }
+
+                        //                     })
+                        //                 }
+                        //             }
+                        //         })
+                        //     }
+                        //     else {
+
+                        //         console.log('balance >= 1')
+                        //         request = await sendRequest(agg_x, dataset, band, scale, start_date, end_date, geometry_array)
+
+                        //         console.log(request)
+
+                        //         if (request != undefined && request.Success != undefined) {
+                        //             sleep(60000).then(async _ => {
+                        //                 geostats_data = await getGeostatsData(offset)
+
+                        //                 console.log(geostats_data)
+
+                        //                 finalResult = await setFinalReferenceValue(parseInt(poolData.id), geostats_data)
+
+                        //                 console.log(finalResult)
+
+                        //             })
+                        //         }
+                        //     }
+                        // })
+
+                        sendRequest(agg_x, dataset, band, scale, start_date, end_date, geometry_array, poolData.id).then((request) => {
+                            console.log(request)
+
+                            if (request != undefined && request.Success != undefined) {
+                                sleep(60000).then(() => {
+                                    getGeostatsData(offset).then((geostatsData) => {
+                                        geostats_data = geostatsData
+
+                                        console.log(geostats_data)
+
+                                        tries = 1
+
+                                        while (geostats_data == "-1" && tries < 3) {
+
+                                            console.log("Try: ", tries)
+
+                                            sendRequest(agg_x, dataset, band, scale, start_date, end_date, geometry_array, poolData.id).then((request) => {
+                                                // console.log(request)
+
+                                                if (request != undefined && request.Success != undefined) {
+                                                    sleep(60000).then(() => {
+                                                        getGeostatsData(offset).then((geostatsData) => {
+                                                            geostats_data = geostatsData
+                                                            tries += 1
+                                                        })
+                                                    })
+                                                }
+
+                                            })
+
+                                        }
+
+                                        setFinalReferenceValue(parseInt(poolData.id), geostats_data).then((finalResult) => {
+                                            console.log(finalResult)
+
+                                        })
+
+                                    })
+
+
+                                })
+                            }
+                        })
+
+
+                    }
                 }
-            }
+
+            })
+
+
         }
-    }
+    })
 
 };
