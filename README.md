@@ -69,7 +69,7 @@ It sends the request to the Shamba Geospatial Oracle by fetching the request par
 
 ### Receiving the data from the Shamba Geospatial Oracle
 
-After the request being made, the corresponding response is received in the form of geostats-data (as 18 decimal integer representation) via `getGeostatsData` function.
+After the request being made, the corresponding response is received in the form of geostats-data (as 18 decimal integer representation) via `getLatestGeostatsData` function.
 
 ### Setting the final reference value of the pool
 
