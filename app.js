@@ -36,7 +36,7 @@ function getEligiblePoolData() {
 
     timeStampBefore7Days = Math.floor(Date.now() / 1000) - (7 * 24 * 60 * 60)
 
-    // console.log(timestampNow, timeStampBefore7Days)
+    // It's a conscious decision to not include statusFinalReferenceValue = "Challenged" to avoid resubmitting values automatically when a submission is challenged
 
     const query = `{
         pools(where:{dataProvider: "${dataProviderAddress}", expiryTime_lt: ${timestampNow}, expiryTime_gte: ${timeStampBefore7Days}, statusFinalReferenceValue: "Open", referenceAsset_starts_with: "https://", referenceAsset_contains: "ipfs", referenceAsset_ends_with: ".json"}) {
@@ -51,7 +51,6 @@ function getEligiblePoolData() {
         'query': query
     })
         .then(async response => {
-            // console.log(response.data)
 
             while (true) {
 
@@ -70,7 +69,6 @@ function getEligiblePoolData() {
                     'query': queryMore
                 })
 
-                // console.log(lastId)
 
                 if (newResponse.data.data.pools.length == 0) {
                     return response.data.data.pools
@@ -118,7 +116,6 @@ async function sendRequest(requestIpfsCid, pool_id) {
         return GeoConsumerContract.requestGeostatsData(requestIpfsCid, {gasLimit: gasLimit, gasPrice: gasPrice})
             .then(_ => {
 
-                // console.log(data)
                 return ({ "Success": `Request for pool id ${pool_id} has been sent to Shamba Geospatial Oracle successfully.` })
             })
             .catch(err => {
@@ -223,7 +220,9 @@ function isValidRequest(requestData, poolExpiryTime, poolCreationTime) {
                 diffTime_Pool = Math.abs(pool_expiry_date - end_date)
                 diffDays_Pool = Math.ceil(diffTime_Pool / (1000 * 60 * 60 * 24))
 
-                if (diffDays >= 30 && diffDays_Pool >= 10) {
+                if (diffDays >= 30 && diffDays_Pool >= 10
+                    && start_date > pool_creation_date    // Comment this condition for testing
+                    ) {
 
                     if (geometry != undefined && geometry.hasOwnProperty("features") && geometry.features.length > 0) {
 
@@ -259,9 +258,7 @@ function isValidRequest(requestData, poolExpiryTime, poolCreationTime) {
 exports.shambaDivaMiddleware = (event, context) => {
 
     getEligiblePoolData().then(async (poolDataList) => {
-        // console.log(poolDataList)
         for (var poolData of poolDataList) {
-            // console.log(poolData)
             await getRequestDataFromIPFS(poolData.referenceAsset).then(async (requestData) => {
                 if (requestData.data) {
 
@@ -270,23 +267,20 @@ exports.shambaDivaMiddleware = (event, context) => {
                         requestIpfsCid = poolData.referenceAsset
                         offset = requestData.data.offset
 
-                        // console.log(requestIpfsCid, offset)
     
                         await sendRequest(requestIpfsCid, poolData.id).then(async (request) => {
-                            // console.log(request)
     
                             if (request != undefined && request.Success != undefined) {
                                 await sleep(60000).then(async () => {
                                     await getLatestGeostatsData(offset).then(async (geostatsData) => {
                                         var geostats_data = geostatsData
     
-                                        // console.log(geostats_data)
     
                                         tries = 1
     
                                         while (geostats_data == "-1" && tries < 3) {
     
-                                            // console.log("Try: ", tries)
+                                            console.log("Try: ", tries)
     
                                             await sendRequest(requestIpfsCid, poolData.id).then(async (request) => {
     
