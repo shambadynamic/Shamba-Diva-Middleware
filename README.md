@@ -7,7 +7,7 @@
 
 ## What it does ?
 
-It fetches all the **eligible expired pools** created using [Diva Protocol App](https://app.diva.finance/) from the [Diva Graph](https://thegraph.com/hosted-service/subgraph/divaprotocol/diva-polygon-pilot).
+It fetches all the **eligible expired pools** created using [Diva Protocol App](https://app.diva.finance/) from the [Diva Graph](https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-polygon).
 
 ### What are eligible expired pools ?
 
