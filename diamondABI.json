@@ -172,18 +172,6 @@
     "type": "error"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_initializationContractAddress",
-        "type": "address"
-      },
-      { "internalType": "bytes", "name": "_calldata", "type": "bytes" }
-    ],
-    "name": "EmptyCalldataNonZeroInitAddress",
-    "type": "error"
-  },
-  {
     "inputs": [{ "internalType": "uint8", "name": "_action", "type": "uint8" }],
     "name": "IncorrectFacetCutAction",
     "type": "error"
@@ -232,18 +220,6 @@
       { "internalType": "address", "name": "_facetAddress", "type": "address" }
     ],
     "name": "RemoveFacetAddressMustBeZeroAddress",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_initializationContractAddress",
-        "type": "address"
-      },
-      { "internalType": "bytes", "name": "_calldata", "type": "bytes" }
-    ],
-    "name": "ZeroInitAddressNonEmptyCalldata",
     "type": "error"
   },
   {
@@ -397,7 +373,9 @@
     "stateMutability": "view",
     "type": "function"
   },
+  { "inputs": [], "name": "FeeTokensNotSupported", "type": "error" },
   { "inputs": [], "name": "InvalidSignature", "type": "error" },
+  { "inputs": [], "name": "NonExistentPool", "type": "error" },
   {
     "inputs": [],
     "name": "OfferInvalidCancelledFilledOrExpired",
@@ -473,9 +451,9 @@
                 "type": "uint256"
               },
               {
-                "internalType": "uint256",
+                "internalType": "bytes32",
                 "name": "poolId",
-                "type": "uint256"
+                "type": "bytes32"
               },
               { "internalType": "uint256", "name": "salt", "type": "uint256" }
             ],
@@ -536,7 +514,7 @@
             "name": "minimumTakerFillAmount",
             "type": "uint256"
           },
-          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "bytes32", "name": "poolId", "type": "bytes32" },
           { "internalType": "uint256", "name": "salt", "type": "uint256" }
         ],
         "internalType": "struct LibEIP712.OfferAddLiquidity",
@@ -611,7 +589,7 @@
             "name": "minimumTakerFillAmount",
             "type": "uint256"
           },
-          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "bytes32", "name": "poolId", "type": "bytes32" },
           { "internalType": "uint256", "name": "salt", "type": "uint256" }
         ],
         "internalType": "struct LibEIP712.OfferAddLiquidity[]",
@@ -720,7 +698,7 @@
             "name": "minimumTakerFillAmount",
             "type": "uint256"
           },
-          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "bytes32", "name": "poolId", "type": "bytes32" },
           { "internalType": "uint256", "name": "salt", "type": "uint256" }
         ],
         "internalType": "struct LibEIP712.OfferRemoveLiquidity[]",
@@ -760,7 +738,7 @@
             "name": "minimumTakerFillAmount",
             "type": "uint256"
           },
-          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "bytes32", "name": "poolId", "type": "bytes32" },
           { "internalType": "uint256", "name": "salt", "type": "uint256" }
         ],
         "internalType": "struct LibEIP712.OfferAddLiquidity",
@@ -869,7 +847,7 @@
             "name": "minimumTakerFillAmount",
             "type": "uint256"
           },
-          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "bytes32", "name": "poolId", "type": "bytes32" },
           { "internalType": "uint256", "name": "salt", "type": "uint256" }
         ],
         "internalType": "struct LibEIP712.OfferRemoveLiquidity",
@@ -1119,9 +1097,9 @@
                 "type": "uint256"
               },
               {
-                "internalType": "uint256",
+                "internalType": "bytes32",
                 "name": "poolId",
-                "type": "uint256"
+                "type": "bytes32"
               },
               { "internalType": "uint256", "name": "salt", "type": "uint256" }
             ],
@@ -1182,7 +1160,7 @@
             "name": "minimumTakerFillAmount",
             "type": "uint256"
           },
-          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "bytes32", "name": "poolId", "type": "bytes32" },
           { "internalType": "uint256", "name": "salt", "type": "uint256" }
         ],
         "internalType": "struct LibEIP712.OfferRemoveLiquidity",
@@ -1375,13 +1353,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "getLatestPoolId",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "components": [
@@ -1408,7 +1379,7 @@
             "name": "minimumTakerFillAmount",
             "type": "uint256"
           },
-          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "bytes32", "name": "poolId", "type": "bytes32" },
           { "internalType": "uint256", "name": "salt", "type": "uint256" }
         ],
         "internalType": "struct LibEIP712.OfferAddLiquidity",
@@ -1601,7 +1572,7 @@
             "name": "minimumTakerFillAmount",
             "type": "uint256"
           },
-          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "bytes32", "name": "poolId", "type": "bytes32" },
           { "internalType": "uint256", "name": "salt", "type": "uint256" }
         ],
         "internalType": "struct LibEIP712.OfferRemoveLiquidity",
@@ -1677,6 +1648,13 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getPoolCount",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -1685,13 +1663,13 @@
       }
     ],
     "name": "getPoolIdByTypedCreateOfferHash",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_poolId", "type": "uint256" }
+      { "internalType": "bytes32", "name": "_poolId", "type": "bytes32" }
     ],
     "name": "getPoolParameters",
     "outputs": [
@@ -1843,6 +1821,15 @@
   },
   {
     "inputs": [
+      { "internalType": "bytes32", "name": "_poolId", "type": "bytes32" }
+    ],
+    "name": "getReservedClaim",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
       {
         "internalType": "uint48",
         "name": "_indexSettlementPeriods",
@@ -1946,15 +1933,6 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "uint256", "name": "_poolId", "type": "uint256" }
-    ],
-    "name": "getTip",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "getTreasuryInfo",
     "outputs": [
@@ -1973,6 +1951,7 @@
     "stateMutability": "view",
     "type": "function"
   },
+  { "inputs": [], "name": "AlreadyUnpaused", "type": "error" },
   {
     "inputs": [
       {
@@ -2458,15 +2437,14 @@
     "stateMutability": "nonpayable",
     "type": "function"
   },
-  { "inputs": [], "name": "ZeroLongAndShortRecipients", "type": "error" },
   {
     "anonymous": false,
     "inputs": [
       {
         "indexed": true,
-        "internalType": "uint256",
+        "internalType": "bytes32",
         "name": "poolId",
-        "type": "uint256"
+        "type": "bytes32"
       },
       {
         "indexed": true,
@@ -2489,9 +2467,28 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "uint256",
+        "internalType": "bytes32",
         "name": "poolId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
         "type": "uint256"
+      }
+    ],
+    "name": "FeeClaimReserved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "poolId",
+        "type": "bytes32"
       },
       {
         "indexed": true,
@@ -2520,9 +2517,9 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "uint256",
+        "internalType": "bytes32",
         "name": "poolId",
-        "type": "uint256"
+        "type": "bytes32"
       },
       {
         "indexed": true,
@@ -2548,7 +2545,7 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_poolId", "type": "uint256" },
+      { "internalType": "bytes32", "name": "_poolId", "type": "bytes32" },
       {
         "internalType": "uint256",
         "name": "_collateralAmountIncr",
@@ -2574,7 +2571,7 @@
     "inputs": [
       {
         "components": [
-          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "bytes32", "name": "poolId", "type": "bytes32" },
           {
             "internalType": "uint256",
             "name": "collateralAmountIncr",
@@ -2605,7 +2602,7 @@
     "inputs": [
       {
         "components": [
-          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "bytes32", "name": "poolId", "type": "bytes32" },
           { "internalType": "uint256", "name": "amount", "type": "uint256" }
         ],
         "internalType": "struct ILiquidity.ArgsBatchRemoveLiquidity[]",
@@ -2620,7 +2617,7 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_poolId", "type": "uint256" },
+      { "internalType": "bytes32", "name": "_poolId", "type": "bytes32" },
       { "internalType": "uint256", "name": "_amount", "type": "uint256" }
     ],
     "name": "removeLiquidity",
@@ -2633,9 +2630,9 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "uint256",
+        "internalType": "bytes32",
         "name": "poolId",
-        "type": "uint256"
+        "type": "bytes32"
       },
       {
         "indexed": true,
@@ -2722,7 +2719,7 @@
     ],
     "name": "batchCreateContingentPool",
     "outputs": [
-      { "internalType": "uint256[]", "name": "", "type": "uint256[]" }
+      { "internalType": "bytes32[]", "name": "", "type": "bytes32[]" }
     ],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2783,7 +2780,7 @@
       }
     ],
     "name": "createContingentPool",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -2804,9 +2801,9 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "uint256",
+        "internalType": "bytes32",
         "name": "poolId",
-        "type": "uint256"
+        "type": "bytes32"
       },
       {
         "indexed": true,
@@ -2841,40 +2838,9 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "enum LibDIVAStorage.Status",
-        "name": "statusFinalReferenceValue",
-        "type": "uint8"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "by",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint256",
+        "internalType": "bytes32",
         "name": "poolId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "proposedFinalReferenceValue",
-        "type": "uint256"
-      }
-    ],
-    "name": "StatusChanged",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "poolId",
-        "type": "uint256"
+        "type": "bytes32"
       },
       {
         "indexed": true,
@@ -2889,14 +2855,45 @@
         "type": "uint256"
       }
     ],
-    "name": "TipAllocated",
+    "name": "ReservedClaimAllocated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "enum LibDIVAStorage.Status",
+        "name": "statusFinalReferenceValue",
+        "type": "uint8"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "by",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "poolId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "proposedFinalReferenceValue",
+        "type": "uint256"
+      }
+    ],
+    "name": "StatusChanged",
     "type": "event"
   },
   {
     "inputs": [
       {
         "components": [
-          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "bytes32", "name": "poolId", "type": "bytes32" },
           {
             "internalType": "uint256",
             "name": "proposedFinalReferenceValue",
@@ -2938,7 +2935,7 @@
     "inputs": [
       {
         "components": [
-          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "bytes32", "name": "poolId", "type": "bytes32" },
           {
             "internalType": "uint256",
             "name": "finalReferenceValue",
@@ -2958,7 +2955,7 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_poolId", "type": "uint256" },
+      { "internalType": "bytes32", "name": "_poolId", "type": "bytes32" },
       {
         "internalType": "uint256",
         "name": "_proposedFinalReferenceValue",
@@ -2986,7 +2983,7 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_poolId", "type": "uint256" },
+      { "internalType": "bytes32", "name": "_poolId", "type": "bytes32" },
       {
         "internalType": "uint256",
         "name": "_finalReferenceValue",
@@ -3011,9 +3008,9 @@
       },
       {
         "indexed": true,
-        "internalType": "uint256",
+        "internalType": "bytes32",
         "name": "poolId",
-        "type": "uint256"
+        "type": "bytes32"
       },
       {
         "indexed": true,
@@ -3033,7 +3030,7 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_poolId", "type": "uint256" },
+      { "internalType": "bytes32", "name": "_poolId", "type": "bytes32" },
       { "internalType": "uint256", "name": "_amount", "type": "uint256" }
     ],
     "name": "addTip",
@@ -3045,7 +3042,7 @@
     "inputs": [
       {
         "components": [
-          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "bytes32", "name": "poolId", "type": "bytes32" },
           { "internalType": "uint256", "name": "amount", "type": "uint256" }
         ],
         "internalType": "struct ITip.ArgsBatchAddTip[]",
